@@ -1,0 +1,558 @@
+// practical 1
+#include <iostream>
+#include <string>
+
+int main() {
+    const double PI = 3.14159;
+    int age = 18;
+    float temperature = 36.5f;
+    double salary = 75000.50;
+    char grade = 'A';
+    bool isStudent = true;
+    std::string name = "Neil Kashyap";
+
+    std::cout << "=== C++ Fundamentals Demo ==-\n";
+    std::cout << "Name: " << name << "\n";
+    std::cout << "Age: " << age << " | Is Student? " << (isStudent ? "Yes" : "No") << "\n";
+    std::cout << "Grade: " << grade << " | Temperature: " << temperature << " C\n";
+    std::cout << "Constant PI: " << PI << "\n\n";
+
+    int a = 15, b = 4;
+    
+    std::cout << "--- Arithmetic Operators ---\n";
+    std::cout << "a + b = " << (a + b) << "\n";
+    std::cout << "a - b = " << (a - b) << "\n";
+    std::cout << "a * b = " << (a * b) << "\n";
+    std::cout << "a / b = " << (static_cast<double>(a) / b) << "\n";
+    std::cout << "a % b = " << (a % b) << "\n\n";
+
+    std::cout << "--- Relational & Logical Operators ---\n";
+    bool relCheck = (a > b) && (b != 0);
+    std::cout << "(a > b) && (b != 0) : " << (relCheck ? "True" : "False") << "\n";
+
+    return 0;
+}
+
+
+// practical 2
+#include <iostream>
+#include <string>
+
+class Vehicle {
+private:
+    std::string vin;
+
+protected:
+    std::string brand;
+    std::string model;
+
+public:
+    Vehicle(std::string v, std::string b, std::string m) 
+        : vin(v), brand(b), model(m) {}
+
+    void startEngine() const {
+        std::cout << "Engine started for " << brand << " " << model << ".\n";
+    }
+    
+    std::string getVin() const { 
+        return vin; 
+    }
+};
+
+class Car : public Vehicle {
+private:
+    int seatingCapacity;
+
+public:
+    Car(std::string v, std::string b, std::string m, int seats)
+        : Vehicle(v, b, m), seatingCapacity(seats) {}
+
+    void displayCarDetails() const {
+        std::cout << "Brand: " << brand << "\n";
+        std::cout << "Model: " << model << "\n";
+        std::cout << "VIN: " << getVin() << "\n";
+        std::cout << "Seating Capacity: " << seatingCapacity << " seats\n";
+    }
+};
+
+int main() {
+    Car myCar("VIN987654321", "Toyota", "Camry", 5);
+    
+    myCar.startEngine();
+    std::cout << "\n--- Car Details ---\n";
+    myCar.displayCarDetails();
+
+    return 0;
+}
+// pactical 3
+#include <iostream>
+#include <string>
+
+class Vehicle {
+private:
+    std::string vin;
+
+protected:
+    std::string brand;
+    std::string model;
+
+public:
+    Vehicle(std::string v, std::string b, std::string m) 
+        : vin(v), brand(b), model(m) {}
+
+    void startEngine() const {
+        std::cout << "Engine started for " << brand << " " << model << ".\n";
+    }
+    
+    std::string getVin() const { 
+        return vin; 
+    }
+};
+
+class Car : public Vehicle {
+private:
+    int seatingCapacity;
+
+public:
+    Car(std::string v, std::string b, std::string m, int seats)
+        : Vehicle(v, b, m), seatingCapacity(seats) {}
+
+    void displayCarDetails() const {
+        std::cout << "Brand: " << brand << "\n";
+        std::cout << "Model: " << model << "\n";
+        std::cout << "VIN: " << getVin() << "\n";
+        std::cout << "Seating Capacity: " << seatingCapacity << " seats\n";
+    }
+};
+
+int main() {
+    Car myCar("VIN987654321", "Toyota", "Camry", 5);
+    
+    myCar.startEngine();
+    std::cout << "\n--- Car Details ---\n";
+    myCar.displayCarDetails();
+
+    return 0;
+}
+
+// practicals 4
+#include <iostream>
+#include <string>
+
+class Person {
+protected:
+    std::string name;
+    int age;
+
+public:
+    Person(std::string n, int a) : name(n), age(a) {}
+
+    void displayPerson() const {
+        std::cout << "Name: " << name << "\nAge: " << age << std::endl;
+    }
+};
+
+class Student : public Person {
+protected:
+    int studentID;
+    std::string department;
+
+public:
+    Student(std::string n, int a, int id, std::string dept)
+        : Person(n, a), studentID(id), department(dept) {}
+
+    void displayStudent() const {
+        displayPerson();
+        std::cout << "Student ID: " << studentID 
+                  << "\nDepartment: " << department << std::endl;
+    }
+};
+
+class GraduateStudent : public Student {
+private:
+    std::string thesisTitle;
+    std::string advisorName;
+
+public:
+    GraduateStudent(std::string n, int a, int id, std::string dept, std::string thesis, std::string advisor)
+        : Student(n, a, id, dept), thesisTitle(thesis), advisorName(advisor) {}
+
+    void displayGraduateStudent() const {
+        displayStudent();
+        std::cout << "Thesis Title: " << thesisTitle 
+                  << "\nAdvisor: " << advisorName << std::endl;
+    }
+};
+
+int main() {
+    std::cout << "--- Single Inheritance Demo (Student) ---\n";
+    Student undergrad("Aarav Sharma", 19, 101, "Computer Engineering");
+    undergrad.displayStudent();
+
+    std::cout << "\n--- Multilevel Inheritance Demo (GraduateStudent) ---\n";
+    GraduateStudent grad("Ananya Kulkarni", 23, 502, "Artificial Intelligence", "Deep Learning for Medical Imaging", "Dr. Deshmukh");
+    grad.displayGraduateStudent();
+
+    return 0;
+}
+
+// practical 5
+
+#include <iostream>
+
+class Shape {
+public:
+    virtual double area() const = 0;
+    virtual ~Shape() {} 
+};
+
+class Circle : public Shape {
+private:
+    double radius;
+public:
+    Circle(double r) : radius(r) {}
+    
+    double area() const override {
+        return 3.14159 * radius * radius;
+    }
+};
+
+class Rectangle : public Shape {
+private:
+    double length, width;
+public:
+    Rectangle(double l, double w) : length(l), width(w) {}
+    
+    double area() const override {
+        return length * width;
+    }
+};
+
+class Triangle : public Shape {
+private:
+    double base, height;
+public:
+    Triangle(double b, double h) : base(b), height(h) {}
+    
+    double area() const override {
+        return 0.5 * base * height;
+    }
+};
+
+int main() {
+    Shape* shapes[3];
+    shapes[0] = new Circle(5.0);
+    shapes[1] = new Rectangle(4.0, 5.0);
+    shapes[2] = new Triangle(6.0, 3.0);
+
+    for (int i = 0; i < 3; ++i) {
+        std::cout << "Area of Shape " << i + 1 << ": " << shapes[i]->area() << std::endl;
+    }
+
+    for (int i = 0; i < 3; ++i) {
+        delete shapes[i];
+    }
+
+    return 0;
+}
+
+// practical 6
+
+#include <iostream>
+
+class Complex {
+private:
+    double real;
+    double imag;
+
+public:
+    Complex() : real(0.0), imag(0.0) {}
+    Complex(double r, double i) : real(r), imag(i) {}
+
+    void setValues(double r) {
+        real = r;
+        imag = 0.0;
+    }
+
+    void setValues(double r, double i) {
+        real = r;
+        imag = i;
+    }
+
+    Complex operator+(const Complex& other) const {
+        return Complex(real + other.real, imag + other.imag);
+    }
+
+    friend std::ostream& operator<<(std::ostream& out, const Complex& c) {
+        out << c.real << " + " << c.imag << "i";
+        return out;
+    }
+};
+
+int main() {
+    Complex c1, c2;
+
+    c1.setValues(3.5, 2.5);
+    c2.setValues(1.5, 4.0);
+
+    Complex c3 = c1 + c2;
+
+    std::cout << "First Complex Number: " << c1 << std::endl;
+    std::cout << "Second Complex Number: " << c2 << std::endl;
+    std::cout << "Sum (c1 + c2): " << c3 << std::endl;
+
+    return 0;
+}
+
+// practical 7
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <stdexcept>
+
+template <typename T>
+class Stack {
+private:
+    std::vector<T> elements;
+
+public:
+    void push(const T& val) {
+        elements.push_back(val);
+    }
+
+    void pop() {
+        if (elements.empty()) {
+            throw std::underflow_error("Stack underflow!");
+        }
+        elements.pop_back();
+    }
+
+    T top() const {
+        if (elements.empty()) {
+            throw std::underflow_error("Stack is empty!");
+        }
+        return elements.back();
+    }
+
+    bool isEmpty() const {
+        return elements.empty();
+    }
+};
+
+int main() {
+    Stack<int> intStack;
+    intStack.push(10);
+    intStack.push(20);
+    std::cout << "Integer Stack Top: " << intStack.top() << std::endl;
+    intStack.pop();
+
+    Stack<float> floatStack;
+    floatStack.push(5.5f);
+    floatStack.push(12.8f);
+    std::cout << "Float Stack Top: " << floatStack.top() << std::endl;
+
+    Stack<std::string> stringStack;
+    stringStack.push("C++");
+    stringStack.push("Templates");
+    std::cout << "String Stack Top: " << stringStack.top() << std::endl;
+
+    return 0;
+}
+
+// practical 8
+
+#include <iostream>
+#include <vector>
+#include <map>
+#include <unordered_map>
+#include <algorithm>
+#include <string>
+
+struct Student {
+    int id;
+    std::string name;
+    int marks;
+};
+
+int main() {
+    std::vector<Student> students = {
+        {103, "Rohan", 78},
+        {101, "Aarav", 92},
+        {104, "Sneha", 65},
+        {102, "Ananya", 88}
+    };
+
+    std::sort(students.begin(), students.end(), [](const Student& a, const Student& b) {
+        return a.marks > b.marks;
+    });
+
+    std::cout << "--- Sorted Students (By Marks Descending) ---\n";
+    for (const auto& s : students) {
+        std::cout << s.id << " - " << s.name << ": " << s.marks << "\n";
+    }
+
+    auto topScorer = std::find_if(students.begin(), students.end(), [](const Student& s) {
+        return s.marks > 90;
+    });
+
+    if (topScorer != students.end()) {
+        std::cout << "\nTop Scorer (>90): " << topScorer->name << " (" << topScorer->marks << ")\n";
+    }
+
+    std::vector<int> updatedMarks(students.size());
+    std::transform(students.begin(), students.end(), updatedMarks.begin(), [](const Student& s) {
+        return std::min(100, s.marks + 5);
+    });
+
+    std::cout << "\n--- Updated Marks (+5 Grace) ---\n";
+    for (size_t i = 0; i < students.size(); ++i) {
+        std::cout << students[i].name << ": " << updatedMarks[i] << "\n";
+    }
+
+    std::map<int, std::string> sortedDirectory;
+    std::unordered_map<std::string, int> fastMarksLookup;
+
+    for (size_t i = 0; i < students.size(); ++i) {
+        sortedDirectory[students[i].id] = students[i].name;
+        fastMarksLookup[students[i].name] = updatedMarks[i];
+    }
+
+    std::cout << "\n--- Sorted Directory (std::map by Roll No) ---\n";
+    for (const auto& pair : sortedDirectory) {
+        std::cout << "ID " << pair.first << ": " << pair.second << "\n";
+    }
+
+    std::cout << "\n--- Fast Lookup (std::unordered_map) ---\n";
+    std::cout << "Ananya's Updated Marks: " << fastMarksLookup["Ananya"] << "\n";
+
+    return 0;
+}
+
+// practical 9
+
+#include <iostream>
+#include <exception>
+#include <string>
+
+class BankingException : public std::exception {
+protected:
+    std::string message;
+public:
+    BankingException(const std::string& msg) : message(msg) {}
+    const char* what() const noexcept override {
+        return message.c_str();
+    }
+};
+
+class InvalidAmountException : public BankingException {
+public:
+    InvalidAmountException(double amt)
+        : BankingException("Invalid transaction amount: " + std::to_string(amt)) {}
+};
+
+class InsufficientFundsException : public BankingException {
+public:
+    InsufficientFundsException(double balance, double required)
+        : BankingException("Insufficient funds! Available: " + std::to_string(balance) +
+                           ", Requested: " + std::to_string(required)) {}
+};
+
+class BankAccount {
+private:
+    double balance;
+public:
+    BankAccount(double initialBalance) : balance(initialBalance) {}
+
+    void withdraw(double amount) {
+        if (amount <= 0) {
+            throw InvalidAmountException(amount);
+        }
+        if (amount > balance) {
+            throw InsufficientFundsException(balance, amount);
+        }
+        balance -= amount;
+        std::cout << "Withdrawal successful. Remaining balance: " << balance << "\n";
+    }
+};
+
+int main() {
+    BankAccount account(5000.0);
+
+    try {
+        std::cout << "Attempting to withdraw -200...\n";
+        account.withdraw(-200.0);
+    } catch (const InvalidAmountException& e) {
+        std::cerr << "[Caught InvalidAmountException]: " << e.what() << "\n\n";
+    } catch (const BankingException& e) {
+        std::cerr << "[Caught BankingException]: " << e.what() << "\n\n";
+    }
+
+    try {
+        std::cout << "Attempting to withdraw 7500...\n";
+        account.withdraw(7500.0);
+    } catch (const InsufficientFundsException& e) {
+        std::cerr << "[Caught InsufficientFundsException]: " << e.what() << "\n\n";
+    } catch (const BankingException& e) {
+        std::cerr << "[Caught BankingException]: " << e.what() << "\n\n";
+    }
+
+    try {
+        std::cout << "Attempting to withdraw 1500...\n";
+        account.withdraw(1500.0);
+    } catch (const BankingException& e) {
+        std::cerr << "[Caught BankingException]: " << e.what() << "\n";
+    }
+
+    return 0;
+}
+
+// practical 10
+#include <iostream>
+#include <fstream>
+#include <string>
+
+int main() {
+    const std::string filename = "students.csv";
+
+    std::fstream file(filename, std::ios::out | std::ios::trunc);
+    if (!file) {
+        std::cerr << "Error opening file for writing!\n";
+        return 1;
+    }
+
+    file << "ID,Name,Marks\n";
+    file << "101,Aarav,85\n";
+    
+    std::streampos posBeforeUpdate = file.tellp();
+    std::cout << "Put pointer (tellp) after second line: " << posBeforeUpdate << " bytes\n";
+
+    file << "102,Rohan,00\n";
+    file << "103,Ananya,92\n";
+
+    file.seekp(posBeforeUpdate + std::streamoff(10));
+    file << "89";
+
+    file.close();
+
+    file.open(filename, std::ios::in);
+    if (!file) {
+        std::cerr << "Error opening file for reading!\n";
+        return 1;
+    }
+
+    file.seekg(0, std::ios::end);
+    std::streampos fileSize = file.tellg();
+    std::cout << "Total CSV File Size (tellg at end): " << fileSize << " bytes\n\n";
+
+    file.seekg(0, std::ios::beg);
+
+    std::cout << "--- Stored Student Records (CSV) ---\n";
+    std::string line;
+    while (std::getline(file, line)) {
+        std::cout << "Pos [" << file.tellg() << "]: " << line << "\n";
+    }
+
+    file.close();
+    return 0;
+}
