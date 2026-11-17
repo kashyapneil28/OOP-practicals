@@ -1,278 +1,296 @@
 #include <iostream>
+#include <fstream>
+#include <vector>
+#include <algorithm>
+#include <stdexcept>
 #include <string>
+#include <sstream>
 #include <limits>
 using namespace std;
 
-// Structure for storing student information
-struct Student {
-    int rollNo;
-    string name;
-    int age;
-    float marks;
-    Student* next;
+// Book class
+class Book {
+private:
+    int id;
+    string title;
+    string author;
+    bool available;
+
+public:
+    Book(int bookId, const string& bookTitle,
+         const string& bookAuthor, bool isAvailable = true)
+        : id(bookId), title(bookTitle),
+          author(bookAuthor), available(isAvailable) {}
+
+    int getId() const {
+        return id;
+    }
+
+    void issue() {
+        if (!available)
+            throw runtime_error("Book is already issued.");
+
+        available = false;
+    }
+
+    void returnBook() {
+        if (available)
+            throw runtime_error("Book is already available.");
+
+        available = true;
+    }
+
+    void display() const {
+        cout << id << " | " << title << " | "
+             << author << " | "
+             << (available ? "Available" : "Issued") << '\n';
+    }
+
+    void save(ofstream& out) const {
+        out << id << '|' << title << '|'
+            << author << '|'
+            << (available ? 1 : 0) << '\n';
+    }
 };
 
-// Head pointer
-Student* head = nullptr;
+// Library class
+class Library {
+private:
+    vector<Book> books;
 
-// Function to check duplicate roll number
-bool rollExists(int roll) {
-    Student* temp = head;
+    Book* findBook(int id) {
+        auto it = find_if(books.begin(), books.end(),
+            [id](const Book& book) {
+                return book.getId() == id;
+            });
 
-    while (temp != nullptr) {
-        if (temp->rollNo == roll) {
-            return true;
-        }
-        temp = temp->next;
-    }
-    return false;
-}
+        if (it == books.end())
+            return nullptr;
 
-// 1. Add Student
-void addStudent() {
-    Student* newStudent = new Student;
-
-    cout << "\nEnter Roll Number: ";
-    cin >> newStudent->rollNo;
-
-    if (rollExists(newStudent->rollNo)) {
-        cout << "Roll number already exists!\n";
-        delete newStudent;
-        return;
+        return &(*it);
     }
 
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+public:
+    // Add a new book
+    void addBook(const Book& book) {
+        if (findBook(book.getId()))
+            throw runtime_error(
+                "A book with this ID already exists.");
 
-    cout << "Enter Name: ";
-    getline(cin, newStudent->name);
-
-    cout << "Enter Age: ";
-    cin >> newStudent->age;
-
-    cout << "Enter Marks: ";
-    cin >> newStudent->marks;
-
-    newStudent->next = nullptr;
-
-    // Insert at end
-    if (head == nullptr) {
-        head = newStudent;
-    } else {
-        Student* temp = head;
-
-        while (temp->next != nullptr) {
-            temp = temp->next;
-        }
-
-        temp->next = newStudent;
+        books.push_back(book);
     }
 
-    cout << "\nStudent added successfully!\n";
-}
+    // Search book by ID
+    void searchBook(int id) {
+        Book* book = findBook(id);
 
-// 2. Display Students
-void displayStudents() {
-    if (head == nullptr) {
-        cout << "\nNo student records found!\n";
-        return;
+        if (!book)
+            throw runtime_error("Book ID not found.");
+
+        cout << "Book found:\n";
+        cout << "ID | Title | Author | Status\n";
+        book->display();
     }
 
-    Student* temp = head;
-
-    cout << "\n========== STUDENT RECORDS ==========\n";
-    cout << "Roll No\tName\t\tAge\tMarks\n";
-    cout << "-------------------------------------\n";
-
-    while (temp != nullptr) {
-        cout << temp->rollNo << "\t"
-             << temp->name << "\t\t"
-             << temp->age << "\t"
-             << temp->marks << endl;
-
-        temp = temp->next;
-    }
-}
-
-// 3. Search Student
-void searchStudent() {
-    int roll;
-
-    cout << "\nEnter Roll Number to Search: ";
-    cin >> roll;
-
-    Student* temp = head;
-
-    while (temp != nullptr) {
-        if (temp->rollNo == roll) {
-            cout << "\nStudent Found!\n";
-            cout << "Roll Number: " << temp->rollNo << endl;
-            cout << "Name: " << temp->name << endl;
-            cout << "Age: " << temp->age << endl;
-            cout << "Marks: " << temp->marks << endl;
+    // Display all books
+    void listBooks() const {
+        if (books.empty()) {
+            cout << "No books found in the library.\n";
             return;
         }
 
-        temp = temp->next;
+        cout << "ID | Title | Author | Status\n";
+
+        for (const Book& book : books)
+            book.display();
     }
 
-    cout << "\nStudent Not Found!\n";
-}
+    // Issue a book
+    void issueBook(int id) {
+        Book* book = findBook(id);
 
-// 4. Update Student
-void updateStudent() {
-    int roll;
+        if (!book)
+            throw runtime_error("Book ID not found.");
 
-    cout << "\nEnter Roll Number to Update: ";
-    cin >> roll;
+        book->issue();
+        cout << "Book issued successfully.\n";
+    }
 
-    Student* temp = head;
+    // Return a book
+    void returnBook(int id) {
+        Book* book = findBook(id);
 
-    while (temp != nullptr) {
-        if (temp->rollNo == roll) {
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        if (!book)
+            throw runtime_error("Book ID not found.");
 
-            cout << "Enter New Name: ";
-            getline(cin, temp->name);
+        book->returnBook();
+        cout << "Book returned successfully.\n";
+    }
 
-            cout << "Enter New Age: ";
-            cin >> temp->age;
+    // Save records to file
+    void saveToFile(const string& filename) const {
+        ofstream out(filename);
 
-            cout << "Enter New Marks: ";
-            cin >> temp->marks;
+        if (!out)
+            throw runtime_error("Unable to save library file.");
 
-            cout << "\nStudent Updated Successfully!\n";
+        for (const Book& book : books)
+            book.save(out);
+    }
+
+    // Load records from file
+    void loadFromFile(const string& filename) {
+        ifstream in(filename);
+
+        if (!in)
             return;
-        }
 
-        temp = temp->next;
-    }
+        books.clear();
+        string line;
 
-    cout << "\nStudent Not Found!\n";
-}
+        while (getline(in, line)) {
+            string idText, title, author, statusText;
+            stringstream ss(line);
 
-// 5. Delete Student
-void deleteStudent() {
-    int roll;
+            if (!getline(ss, idText, '|') ||
+                !getline(ss, title, '|') ||
+                !getline(ss, author, '|') ||
+                !getline(ss, statusText))
+                continue;
 
-    cout << "\nEnter Roll Number to Delete: ";
-    cin >> roll;
+            try {
+                int id = stoi(idText);
+                bool available = (statusText == "1");
 
-    Student* temp = head;
-    Student* previous = nullptr;
-
-    while (temp != nullptr && temp->rollNo != roll) {
-        previous = temp;
-        temp = temp->next;
-    }
-
-    if (temp == nullptr) {
-        cout << "\nStudent Not Found!\n";
-        return;
-    }
-
-    if (previous == nullptr) {
-        head = temp->next;
-    } else {
-        previous->next = temp->next;
-    }
-
-    delete temp;
-
-    cout << "\nStudent Deleted Successfully!\n";
-}
-
-// 6. Sort Students by Marks (Descending)
-void sortStudents() {
-    if (head == nullptr || head->next == nullptr) {
-        cout << "\nNot enough records to sort!\n";
-        return;
-    }
-
-    for (Student* i = head; i->next != nullptr; i = i->next) {
-        for (Student* j = i->next; j != nullptr; j = j->next) {
-            if (i->marks < j->marks) {
-                swap(i->rollNo, j->rollNo);
-                swap(i->name, j->name);
-                swap(i->age, j->age);
-                swap(i->marks, j->marks);
+                books.emplace_back(
+                    id, title, author, available);
+            }
+            catch (const exception&) {
+                // Skip invalid records.
             }
         }
     }
+};
 
-    cout << "\nStudents Sorted by Marks Successfully!\n";
-}
+// Read and validate book ID
+int readBookId() {
+    int id;
 
-// Free dynamically allocated memory
-void clearRecords() {
-    while (head != nullptr) {
-        Student* temp = head;
-        head = head->next;
-        delete temp;
+    while (true) {
+        cout << "Enter Book ID: ";
+
+        if (cin >> id) {
+            cin.ignore(
+                numeric_limits<streamsize>::max(), '\n');
+            return id;
+        }
+
+        cout << "Invalid input. Please enter a number.\n";
+
+        cin.clear();
+        cin.ignore(
+            numeric_limits<streamsize>::max(), '\n');
     }
 }
 
-// Main Function
+// Main function
 int main() {
-    int choice;
+    const string filename = "library.txt";
+
+    Library library;
+
+    try {
+        library.loadFromFile(filename);
+    }
+    catch (const exception& e) {
+        cout << "Error loading file: " << e.what() << '\n';
+    }
+
+    int choice = 0;
 
     do {
-        cout << "\n========================================\n";
-        cout << "     STUDENT RECORD MANAGEMENT SYSTEM\n";
-        cout << "========================================\n";
+        cout << "\n========== LIBRARY MANAGEMENT SYSTEM ==========\n";
+        cout << "1. Add Book\n";
+        cout << "2. Search Book\n";
+        cout << "3. Display All Books\n";
+        cout << "4. Issue Book\n";
+        cout << "5. Return Book\n";
+        cout << "6. Exit\n";
 
-        cout << "1. Add Student\n";
-        cout << "2. Display All Students\n";
-        cout << "3. Search Student\n";
-        cout << "4. Update Student\n";
-        cout << "5. Delete Student\n";
-        cout << "6. Sort Students by Marks\n";
-        cout << "7. Exit\n";
-
-        cout << "========================================\n";
-        cout << "Enter Your Choice: ";
+        cout << "Enter your choice: ";
 
         if (!(cin >> choice)) {
-            cout << "\nInvalid input! Please enter a number.\n";
+            cout << "Invalid input. Please enter a number from 1 to 6.\n";
+
             cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cin.ignore(
+                numeric_limits<streamsize>::max(), '\n');
+
             continue;
         }
 
-        switch (choice) {
-            case 1:
-                addStudent();
-                break;
+        cin.ignore(
+            numeric_limits<streamsize>::max(), '\n');
 
-            case 2:
-                displayStudents();
-                break;
+        try {
+            if (choice == 1) {
+                int id = readBookId();
 
-            case 3:
-                searchStudent();
-                break;
+                string title, author;
 
-            case 4:
-                updateStudent();
-                break;
+                cout << "Enter Book Title: ";
+                getline(cin, title);
 
-            case 5:
-                deleteStudent();
-                break;
+                cout << "Enter Author Name: ";
+                getline(cin, author);
 
-            case 6:
-                sortStudents();
-                break;
+                if (id <= 0 || title.empty() || author.empty())
+                    throw runtime_error(
+                        "ID, title and author must be valid and non-empty.");
 
-            case 7:
-                clearRecords();
-                cout << "\nThank You for Using the System!\n";
-                break;
+                if (title.find('|') != string::npos ||
+                    author.find('|') != string::npos)
+                    throw runtime_error(
+                        "Do not use the | character in title or author.");
 
-            default:
-                cout << "\nInvalid Choice! Try Again.\n";
+                library.addBook(Book(id, title, author));
+                library.saveToFile(filename);
+
+                cout << "Book added successfully.\n";
+            }
+
+            else if (choice == 2) {
+                library.searchBook(readBookId());
+            }
+
+            else if (choice == 3) {
+                library.listBooks();
+            }
+
+            else if (choice == 4) {
+                library.issueBook(readBookId());
+                library.saveToFile(filename);
+            }
+
+            else if (choice == 5) {
+                library.returnBook(readBookId());
+                library.saveToFile(filename);
+            }
+
+            else if (choice == 6) {
+                library.saveToFile(filename);
+                cout << "Library records saved. Thank you!\n";
+            }
+
+            else {
+                cout << "Please enter a choice from 1 to 6.\n";
+            }
+        }
+        catch (const exception& e) {
+            cout << "Error: " << e.what() << '\n';
         }
 
-    } while (choice != 7);
+    } while (choice != 6);
 
     return 0;
 }
