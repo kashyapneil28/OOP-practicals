@@ -1,0 +1,278 @@
+#include <iostream>
+#include <string>
+#include <limits>
+using namespace std;
+
+// Structure for storing student information
+struct Student {
+    int rollNo;
+    string name;
+    int age;
+    float marks;
+    Student* next;
+};
+
+// Head pointer
+Student* head = nullptr;
+
+// Function to check duplicate roll number
+bool rollExists(int roll) {
+    Student* temp = head;
+
+    while (temp != nullptr) {
+        if (temp->rollNo == roll) {
+            return true;
+        }
+        temp = temp->next;
+    }
+    return false;
+}
+
+// 1. Add Student
+void addStudent() {
+    Student* newStudent = new Student;
+
+    cout << "\nEnter Roll Number: ";
+    cin >> newStudent->rollNo;
+
+    if (rollExists(newStudent->rollNo)) {
+        cout << "Roll number already exists!\n";
+        delete newStudent;
+        return;
+    }
+
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    cout << "Enter Name: ";
+    getline(cin, newStudent->name);
+
+    cout << "Enter Age: ";
+    cin >> newStudent->age;
+
+    cout << "Enter Marks: ";
+    cin >> newStudent->marks;
+
+    newStudent->next = nullptr;
+
+    // Insert at end
+    if (head == nullptr) {
+        head = newStudent;
+    } else {
+        Student* temp = head;
+
+        while (temp->next != nullptr) {
+            temp = temp->next;
+        }
+
+        temp->next = newStudent;
+    }
+
+    cout << "\nStudent added successfully!\n";
+}
+
+// 2. Display Students
+void displayStudents() {
+    if (head == nullptr) {
+        cout << "\nNo student records found!\n";
+        return;
+    }
+
+    Student* temp = head;
+
+    cout << "\n========== STUDENT RECORDS ==========\n";
+    cout << "Roll No\tName\t\tAge\tMarks\n";
+    cout << "-------------------------------------\n";
+
+    while (temp != nullptr) {
+        cout << temp->rollNo << "\t"
+             << temp->name << "\t\t"
+             << temp->age << "\t"
+             << temp->marks << endl;
+
+        temp = temp->next;
+    }
+}
+
+// 3. Search Student
+void searchStudent() {
+    int roll;
+
+    cout << "\nEnter Roll Number to Search: ";
+    cin >> roll;
+
+    Student* temp = head;
+
+    while (temp != nullptr) {
+        if (temp->rollNo == roll) {
+            cout << "\nStudent Found!\n";
+            cout << "Roll Number: " << temp->rollNo << endl;
+            cout << "Name: " << temp->name << endl;
+            cout << "Age: " << temp->age << endl;
+            cout << "Marks: " << temp->marks << endl;
+            return;
+        }
+
+        temp = temp->next;
+    }
+
+    cout << "\nStudent Not Found!\n";
+}
+
+// 4. Update Student
+void updateStudent() {
+    int roll;
+
+    cout << "\nEnter Roll Number to Update: ";
+    cin >> roll;
+
+    Student* temp = head;
+
+    while (temp != nullptr) {
+        if (temp->rollNo == roll) {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            cout << "Enter New Name: ";
+            getline(cin, temp->name);
+
+            cout << "Enter New Age: ";
+            cin >> temp->age;
+
+            cout << "Enter New Marks: ";
+            cin >> temp->marks;
+
+            cout << "\nStudent Updated Successfully!\n";
+            return;
+        }
+
+        temp = temp->next;
+    }
+
+    cout << "\nStudent Not Found!\n";
+}
+
+// 5. Delete Student
+void deleteStudent() {
+    int roll;
+
+    cout << "\nEnter Roll Number to Delete: ";
+    cin >> roll;
+
+    Student* temp = head;
+    Student* previous = nullptr;
+
+    while (temp != nullptr && temp->rollNo != roll) {
+        previous = temp;
+        temp = temp->next;
+    }
+
+    if (temp == nullptr) {
+        cout << "\nStudent Not Found!\n";
+        return;
+    }
+
+    if (previous == nullptr) {
+        head = temp->next;
+    } else {
+        previous->next = temp->next;
+    }
+
+    delete temp;
+
+    cout << "\nStudent Deleted Successfully!\n";
+}
+
+// 6. Sort Students by Marks (Descending)
+void sortStudents() {
+    if (head == nullptr || head->next == nullptr) {
+        cout << "\nNot enough records to sort!\n";
+        return;
+    }
+
+    for (Student* i = head; i->next != nullptr; i = i->next) {
+        for (Student* j = i->next; j != nullptr; j = j->next) {
+            if (i->marks < j->marks) {
+                swap(i->rollNo, j->rollNo);
+                swap(i->name, j->name);
+                swap(i->age, j->age);
+                swap(i->marks, j->marks);
+            }
+        }
+    }
+
+    cout << "\nStudents Sorted by Marks Successfully!\n";
+}
+
+// Free dynamically allocated memory
+void clearRecords() {
+    while (head != nullptr) {
+        Student* temp = head;
+        head = head->next;
+        delete temp;
+    }
+}
+
+// Main Function
+int main() {
+    int choice;
+
+    do {
+        cout << "\n========================================\n";
+        cout << "     STUDENT RECORD MANAGEMENT SYSTEM\n";
+        cout << "========================================\n";
+
+        cout << "1. Add Student\n";
+        cout << "2. Display All Students\n";
+        cout << "3. Search Student\n";
+        cout << "4. Update Student\n";
+        cout << "5. Delete Student\n";
+        cout << "6. Sort Students by Marks\n";
+        cout << "7. Exit\n";
+
+        cout << "========================================\n";
+        cout << "Enter Your Choice: ";
+
+        if (!(cin >> choice)) {
+            cout << "\nInvalid input! Please enter a number.\n";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            continue;
+        }
+
+        switch (choice) {
+            case 1:
+                addStudent();
+                break;
+
+            case 2:
+                displayStudents();
+                break;
+
+            case 3:
+                searchStudent();
+                break;
+
+            case 4:
+                updateStudent();
+                break;
+
+            case 5:
+                deleteStudent();
+                break;
+
+            case 6:
+                sortStudents();
+                break;
+
+            case 7:
+                clearRecords();
+                cout << "\nThank You for Using the System!\n";
+                break;
+
+            default:
+                cout << "\nInvalid Choice! Try Again.\n";
+        }
+
+    } while (choice != 7);
+
+    return 0;
+}
